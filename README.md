@@ -50,4 +50,4 @@ int main(void)
 
 ```
 
-And that's about all there is! There is also `testc_free(&instance);` but that is unnecessary in most cases (since the program will end right after the test is finished).
+And that's about all there is! There is also `testc_free(&instance);` but that is unnecessary in most cases (since the program will almost always end right after the test is finished).
