@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: NONE
+# SPDX-License-Identifier: Unlicense
+
+CompileFlags:
+        Add:
+                - -x
+                - c
+                - -std=c99
+                - -pedantic
+                - -Wall
+                - -Wextra
+                - -I.
+                - -DLIBTESTC_IMPLEMENTATION

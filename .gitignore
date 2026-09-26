@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: NONE
+# SPDX-License-Identifier: Unlicense
+
+out
+
+# just in case they were accidentally included
+*.o
+*.exe
+*.dll
+*.a
+*.so
+*.so.1

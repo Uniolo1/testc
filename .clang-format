@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: NONE
+# SPDX-License-Identifier: Unlicense
+
+BasedOnStyle: Microsoft
+
+IndentWidth: 8
+TabWidth: 8
+ColumnLimit: 95
+
+# UseTab: Never
+UseTab: ForIndentation
+
+SpacesBeforeTrailingComments: 1 # 1 comment before trailing comments
+
+# C/C++
+PointerAlignment: Right
+SortIncludes: true
