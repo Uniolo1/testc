@@ -33,7 +33,7 @@ struct testcs_test;
 typedef struct testc_tests testc_tests;
 
 // initalization
-testc_tests testc_get(void);
+testc_tests *testc_get(void);
 int testc_init(testc_tests *instance);
 void testc_free(testc_tests *instance);
 
@@ -64,12 +64,17 @@ struct testc_tests
 
 	testcs_test *tests;
 };
+
 const char *testc_INFO = "testc v0.0.0 <https://github.com/uniolo1/testc>";
 const unsigned testc_VERSION[3] = {0, 0, 0};
 
-testc_tests testc_get(void)
+testc_tests *testc_get(void)
 {
-	testc_tests ret = {.tests = NULL, .count = 0, .initalized = false, .cap = 10};
+	testc_tests *ret = malloc(sizeof(testc_tests));
+	ret->tests = NULL;
+	ret->count = 0;
+	ret->initalized = false;
+	ret->cap = 10;
 
 	return ret;
 }
@@ -77,7 +82,11 @@ testc_tests testc_get(void)
 int testc_init(testc_tests *instance)
 {
 	if (instance->initalized)
+	{
+		// reinitalize
 		testc_free(instance);
+		instance = testc_get();
+	}
 
 	instance->tests = calloc(instance->cap, sizeof(*instance->tests));
 	if (instance->tests == NULL)
@@ -90,11 +99,7 @@ int testc_init(testc_tests *instance)
 
 void testc_free(testc_tests *instance)
 {
-	free(instance->tests);
-	instance->tests = NULL;
-	instance->count = 0;
-	instance->cap = 10;
-	instance->initalized = false;
+	free(instance);
 }
 
 int testc_add_test(testc_tests *instance, int (*function)(void), const char *name)
