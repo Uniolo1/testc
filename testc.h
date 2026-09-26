@@ -22,95 +22,107 @@
  *
  */
 
-#ifndef LIBTESTC_H
-#define LIBTESTC_H
+#ifndef TESTC_H
+#define TESTC_H
+#include <stdlib.h>
 
-extern const char *libtest_INFO;
-extern const unsigned libtest_VERSION[3];
+extern const char *testc_INFO;
+extern const unsigned testc_VERSION[3];
 
-struct libtests_test;
-typedef struct libtest_tests libtest_tests;
+struct testcs_test;
+typedef struct testc_tests testc_tests;
 
 // initalization
-libtest_tests libtest_init(void);
-void libtest_free(libtest_tests *instance);
+testc_tests testc_get(void);
+int testc_init(testc_tests *instance);
+void testc_free(testc_tests *instance);
 
 // add tests
-int libtest_add_test(libtest_tests *instance, int (*function)(void),
-                     const char *restrict name);
+int testc_add_test(testc_tests *instance, int (*function)(void),
+                   const char *restrict name); // BEWARE: if 'name' goes out scope, undefined
+                                               // behavior will ensue!
 
-unsigned long run_tests(libtest_tests *instance);
+size_t run_tests(testc_tests *instance);
 
-#ifdef LIBTESTC_IMPLEMENTATION
+#ifdef TESTC_H_IMPLEMENTATION
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
-struct libtest_tests
+typedef struct testcs_test
+{
+	int (*function)(void);
+	const char *name;
+} testcs_test;
+
+struct testc_tests
 {
 	bool initalized;
 
 	size_t count;
 	size_t cap;
 
-	int (**functions)(void);
-	const char **names;
+	testcs_test *tests;
 };
+const char *testc_INFO = "testc v0.0.0 <https://github.com/uniolo1/testc>";
+const unsigned testc_VERSION[3] = {0, 0, 0};
 
-const char *libtest_INFO = "libtestc v0.0.0 <https://github.com/uniolo1/libtestc>";
-const unsigned libtest_VERSION[3] = {0, 0, 0};
-
-libtest_tests libtest_init(void)
+testc_tests testc_get(void)
 {
-	libtest_tests ret = {
-	    .functions = NULL, .names = NULL, .count = 0, .initalized = false, .cap = 10};
-
-	ret.functions = calloc(ret.cap, sizeof(*ret.functions));
-	ret.names = calloc(ret.cap, sizeof(*ret.names));
+	testc_tests ret = {.tests = NULL, .count = 0, .initalized = false, .cap = 10};
 
 	return ret;
 }
 
-void libtest_free(libtest_tests *instance)
+int testc_init(testc_tests *instance)
 {
-	free(instance->functions);
-	free(instance->names);
+	if (instance->initalized)
+		testc_free(instance);
 
+	instance->tests = calloc(instance->cap, sizeof(*instance->tests));
+	if (instance->tests == NULL)
+		return 1;
+
+	instance->initalized = true;
+
+	return 0;
+}
+
+void testc_free(testc_tests *instance)
+{
+	free(instance->tests);
+	instance->tests = NULL;
+	instance->count = 0;
+	instance->cap = 10;
 	instance->initalized = false;
 }
 
-int libtest_add_test(libtest_tests *instance, int (*function)(void), const char *restrict name)
+int testc_add_test(testc_tests *instance, int (*function)(void), const char *name)
 {
+	if (name == NULL || function == NULL)
+		return 2;
+
 	if (instance->count == instance->cap)
 	{
-		size_t new_cap = instance->cap + 3;
+		size_t new_cap = instance->cap * 2;
 
-		void *temp_ptr =
-		    realloc(instance->functions, new_cap * sizeof(*instance->functions));
-
-		if (temp_ptr == NULL)
-			return 1;
-
-		instance->functions = temp_ptr;
-
-		temp_ptr = realloc(instance->names, new_cap * sizeof(*instance->names));
+		void *temp_ptr = realloc(instance->tests, new_cap * sizeof(*instance->tests));
 
 		if (temp_ptr == NULL)
 			return 1;
 
-		instance->names = temp_ptr;
+		instance->tests = temp_ptr;
 		instance->cap = new_cap;
 	}
 
-	instance->functions[instance->count] = function;
-	instance->names[instance->count] = name;
+	instance->tests[instance->count].function = function;
+	instance->tests[instance->count].name = name;
 	instance->count++;
 
 	return 0;
 }
 
-unsigned long run_tests(libtest_tests *instance)
+size_t run_tests(testc_tests *instance)
 {
 	if (instance->count == 0)
 	{
@@ -119,24 +131,24 @@ unsigned long run_tests(libtest_tests *instance)
 	}
 
 	printf("Running %zu tests\n", instance->count);
-	unsigned failed = 0;
+	size_t failed = 0;
 
 	for (size_t i = 0; i < instance->count; i++)
 	{
-		printf("\n--- \"%s\" (%zu) ---\n", instance->names[i], i);
-
-		int result = instance->functions[i]();
+		printf("\n--- \"%s\" (%zu) ---\n", instance->tests[i].name, i);
+		int result = instance->tests[i].function();
 
 		if (result != 0)
 		{
-			printf("[%d] FAIL: \"%s\" (%zu)\n", result, instance->names[i], i);
+			printf("[%d] FAIL: \"%s\" (%zu)\n", result, instance->tests[i].name,
+			       i);
 			failed++;
 		}
 		else
-			printf("[0] PASS: \"%s\" (%zu)\n", instance->names[i], i);
+			printf("[0] PASS: \"%s\" (%zu)\n", instance->tests[i].name, i);
 	}
 
-	printf("\nSummary: %u/%zu tests faled", failed, instance->count);
+	printf("\nSummary: %zu/%zu tests passed", (instance->count - failed), instance->count);
 	return failed;
 }
 

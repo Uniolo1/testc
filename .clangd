@@ -10,4 +10,4 @@ CompileFlags:
                 - -Wall
                 - -Wextra
                 - -I.
-                - -DLIBTESTC_IMPLEMENTATION
+                - -DTESTC_H_IMPLEMENTATION
