@@ -65,12 +65,15 @@ struct testc_tests
 	testcs_test *tests;
 };
 
-const char *testc_INFO = "testc v0.0.0 <https://github.com/uniolo1/testc>";
-const unsigned testc_VERSION[3] = {0, 0, 0};
+const char *testc_INFO = "testc v1.0.0 <https://github.com/uniolo1/testc>";
+const unsigned testc_VERSION[3] = {1, 0, 0};
 
 testc_tests *testc_get(void)
 {
 	testc_tests *ret = malloc(sizeof(testc_tests));
+	if (ret == NULL)
+		return NULL;
+
 	ret->tests = NULL;
 	ret->count = 0;
 	ret->initalized = false;
@@ -81,6 +84,9 @@ testc_tests *testc_get(void)
 
 int testc_init(testc_tests *instance)
 {
+	if (instance == NULL)
+		return 1;
+
 	if (instance->initalized)
 	{
 		// reinitalize
@@ -90,7 +96,7 @@ int testc_init(testc_tests *instance)
 
 	instance->tests = calloc(instance->cap, sizeof(*instance->tests));
 	if (instance->tests == NULL)
-		return 1;
+		return 2;
 
 	instance->initalized = true;
 

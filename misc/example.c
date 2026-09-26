@@ -19,8 +19,7 @@ int main(void)
 	printf("%s\n", testc_INFO);
 
 	testc_tests *instance = testc_get();
-
-	if (testc_init(instance) != 0)
+	if (testc_init(instance) != 0) // testc_init checks if the input is NULL
 	{
 		puts("Failed to initialize testc");
 		return 1;
